@@ -5,6 +5,7 @@ from sklearn.feature_selection import SelectKBest, f_regression
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVR
 from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import mean_absolute_error , r2_score
 
 
 
@@ -60,7 +61,6 @@ def get_features_target(data):
     selected_mask = selector.get_support()  # Boolean mask
     selected_features = x_features.columns[selected_mask]
 
-    print(selected_features)
 
 
     # change x_features to the selected
@@ -106,6 +106,15 @@ def train_model_grid_search(x_train,y_train):
     svr_best_model = grid_search_svr.best_estimator_
     return svr_best_model
 
+def model_evaluation(model,x_test,y_test):
+    svr_y_pred = model.predict( x_test )
+
+    r2_svr = r2_score( y_test , svr_y_pred )
+    mea_svr = mean_absolute_error( y_test , svr_y_pred )
+
+    return { "r2_score" : r2_svr , "mae" : mea_svr }
+
+
 
 
 
@@ -121,6 +130,8 @@ def main():
     scaled_data = data_scaling(encoded_data)
     x_y_data = get_features_target(scaled_data)
     splited_data = split_data(x_y_data["x_features"],x_y_data["y_target"])
-    print(splited_data)
+    trained_model = train_model_grid_search(splited_data["x_train"],splited_data["y_train"])
+    scores = model_evaluation(trained_model,splited_data["x_test"],splited_data["y_test"])
+    print(scores)
 
 main()
